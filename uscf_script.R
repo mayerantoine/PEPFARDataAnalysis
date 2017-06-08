@@ -1,5 +1,6 @@
 library(tidyverse)
 library(lubridate)
+
 patient_demo <- read_tsv("data/patient_demo.txt")
 patient_cd4 <- read_tsv("data/patient_cd4.txt")
 patient_who_stage <- read_tsv("data/patient_who_stage.txt")
@@ -19,7 +20,9 @@ write_tsv(patient_cd4_2006, path="patient_cd4_2006.txt")
 write_tsv(patient_who_stage_2006, path="patient_who_stage_2006.txt")
 write_tsv(patient_art_ctx_event_2006, path="patient_art_ctx_event_2006.txt")
 
-## NA Fields
+## NA Fields Patient demo
+colSums(is.na(patient_demo))
+
 ##  Review site with last report date less than 2016
 Institution_by <- patient_demo %>% 
   group_by(Institution) %>% 
@@ -36,3 +39,13 @@ head(Institution_byMaxRemp,20)
 table(Institution_byMaxRemp$yearRemp)
 filter(Institution_byMaxRemp,NbDiag < 25)
 filter(Institution_byMaxRemp,yearRemp > 2012 & yearRemp <=2015)
+
+
+cop17facility <- read_csv("data/COP17Facility.csv")
+mesi_report <-  read_csv("data/mesi_report.csv")
+
+names(mesi_report) <- c("CODE","Institution","Hommes.Positifs","Femmes.Positifs","Femmes.Enceintes.Positifs","Total")
+mesi_report_total <- mesi_report %>% select(CODE,Institution,Total)
+names(cop17facility) <- c("SNU1","SNU2","SNU2","Agency","Mechanism","Institution","Category")
+
+## Standardize the site/facility name
