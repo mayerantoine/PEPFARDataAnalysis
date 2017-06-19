@@ -78,3 +78,30 @@ ggplot(hts_tst_by_q)+
     labs(title = "HTS_TST Trend")+
     ylab(" ")
 
+
+# Indicator By Partner for Q2
+q2_ind <- c("HTS_TST","TX_NEW","TX_CURR","HTS_TST_POS",
+            "PMTCT_ART","PMTCT_STAT","PMTCT_EID_POS","PMTCT_EID",
+            "TB_STAT","TB_STAT_POS","TB_ART","TX_TB","OVC_SERV","PMTCT_STAT_POS")
+
+ind_sum <- c("HTS_TST","TX_NEW","HTS_TST_POS", "PMTCT_ART","PMTCT_STAT","PMTCT_EID_POS","PMTCT_EID",
+             "TB_STAT","TB_STAT_POS","PMTCT_STAT_POS")
+ind_cum <- c("TX_CURR","TB_ART","TX_TB","OVC_SERV")
+
+indicator_by_partner <- fy2017q2 %>%
+                        filter(implementingmechanismname != "Dedup") %>%
+                        filter(indicator %in% q2_ind) %>%
+                        filter(indicatortype == "DSD") %>% 
+                        filter(numeratordenom == "N") %>%  
+                        filter(disaggregate == "Total Numerator") %>%
+                        select(implementingmechanismname,indicator,fy2017q1, fy2017q2,fy2017_targets) %>%
+                        group_by(implementingmechanismname, indicator) %>%
+                        summarise(fy2017q1 = sum(fy2017q1, na.rm= TRUE), fy2017q2 = sum(fy2017q2, na.rm= TRUE),
+                                  fy17targets = sum(fy2017_targets, na.rm= TRUE)) %>%
+                        mutate( fy2017sapr = ifelse( indicator %in% ind_sum,fy2017q1+fy2017q2,fy2017q2)) %>%
+                        mutate(fy2017_performance = ifelse(is.na(fy17targets)|fy17targets ==0 ,0,fy2017sapr/fy17targets)) %>%
+                        select(implementingmechanismname, indicator,fy2017_performance) %>%
+                        spread(indicator,fy2017_performance)
+                        
+indicator_by_partner
+#write_csv(indicator_by_partner,"indicator_by_partner.csv")       
