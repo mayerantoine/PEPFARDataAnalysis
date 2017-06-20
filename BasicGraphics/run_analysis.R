@@ -105,3 +105,28 @@ indicator_by_partner <- fy2017q2 %>%
                         
 indicator_by_partner
 #write_csv(indicator_by_partner,"indicator_by_partner.csv")       
+
+
+# HTC by Sex
+
+htc_by_sex <- fy2017q2 %>%
+    filter(indicator == "HTS_TST") %>%
+    filter(indicatortype == "DSD") %>% 
+    filter(standardizeddisaggregate == "Modality/MostCompleteAgeDisagg" 
+                                    | standardizeddisaggregate == "MostCompleteAgeDisagg") %>%
+    select(sex,fy2015q3,fy2015q4,fy2016q1,fy2016q2,fy2016q3,fy2016q4,fy2017q1,fy2017q2) %>%
+    group_by(sex) %>%
+    summarise(fy2015q3 = sum(fy2015q3,na.rm=TRUE),
+              fy2015q4 = sum(fy2015q4,na.rm=TRUE),
+              fy2016q1 = sum(fy2016q1,na.rm=TRUE),
+              fy2016q2 = sum(fy2016q2,na.rm=TRUE),
+              fy2016q3 = sum(fy2016q3,na.rm=TRUE),
+              fy2016q4 = sum(fy2016q4,na.rm=TRUE),
+              fy2017q1 = sum(fy2017q1,na.rm=TRUE),
+              fy2017q2 = sum(fy2017q2,na.rm=TRUE)
+    ) %>%
+    select(sex,fy2015q3,fy2015q4,fy2016q1,fy2016q2,fy2016q3,fy2016q4,fy2017q1,fy2017q2)
+htc_by_sex
+
+write.csv(htc_by_sex,"htc_by_sex.csv")
+
