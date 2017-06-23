@@ -80,7 +80,7 @@ ggplot(hts_tst_by_q)+
     ylab(" ")
 
 
-# Indicator By Partner for Q2
+# Indicator By Partner for Q2, partner score card
 q2_ind <- c("HTS_TST","TX_NEW","TX_CURR","HTS_TST_POS",
             "PMTCT_ART","PMTCT_STAT","PMTCT_EID_POS","PMTCT_EID",
             "TB_STAT","TB_STAT_POS","TB_ART","TX_TB","OVC_SERV","PMTCT_STAT_POS","KP_PREV","PP_PREV")
@@ -112,12 +112,12 @@ write_csv(indicator_by_partner,"indicator_by_partnerv2.csv")
 # HTC by Sex
 
 htc_by_sex <- fy2017q2 %>%
-    filter(indicator == "HTS_TST") %>%
+    filter(indicator %in% c("HTS_TST","HTS_TST_POS")) %>%
     filter(indicatortype == "DSD") %>% 
     filter(standardizeddisaggregate == "Modality/MostCompleteAgeDisagg" 
                                     | standardizeddisaggregate == "MostCompleteAgeDisagg") %>%
-    select(sex,fy2015q3,fy2015q4,fy2016q1,fy2016q2,fy2016q3,fy2016q4,fy2017q1,fy2017q2) %>%
-    group_by(sex) %>%
+    select(sex,indicator,fy2015q3,fy2015q4,fy2016q1,fy2016q2,fy2016q3,fy2016q4,fy2017q1,fy2017q2) %>%
+    group_by(sex,indicator) %>%
     summarise(fy2015q3 = sum(fy2015q3,na.rm=TRUE),
               fy2015q4 = sum(fy2015q4,na.rm=TRUE),
               fy2016q1 = sum(fy2016q1,na.rm=TRUE),
@@ -127,16 +127,50 @@ htc_by_sex <- fy2017q2 %>%
               fy2017q1 = sum(fy2017q1,na.rm=TRUE),
               fy2017q2 = sum(fy2017q2,na.rm=TRUE)
     ) %>%
-    select(sex,fy2015q3,fy2015q4,fy2016q1,fy2016q2,fy2016q3,fy2016q4,fy2017q1,fy2017q2)
+    select(sex,indicator,fy2015q3,fy2015q4,fy2016q1,fy2016q2,fy2016q3,fy2016q4,fy2017q1,fy2017q2)
 htc_by_sex
 
-#write.csv(htc_by_sex,"htc_by_sex.csv")
+write.csv(htc_by_sex,"htc_by_sex2.csv")
 
-# SNU HTC and HTC Pos
-snu_htc <- fy2017q2  %>% filter(indicator == "HTS_TST" | indicator == "HTS_TST_POS" ) %>% 
-    filter(snu1 != "_Military Haiti") %>%
-    filter(indicatortype == "DSD" ) %>%
-    filter(disaggregate == "Total Numerator")
-    select(psnu,fy2017q1,fy2017q2) %>%
-    gather("quarter","NbTested",fy2017q1:fy2017q2)
 
+
+# HTC by SNU
+htc_by_snu <- fy2017q2 %>%
+    filter(indicator %in% c("HTS_TST","HTS_TST_POS")) %>%
+    filter(indicatortype == "DSD") %>% 
+    filter(numeratordenom == "N") %>%  
+    filter(disaggregate == "Total Numerator") %>%
+    select(psnu,indicator,fy2015q3,fy2015q4,fy2016q1,fy2016q2,fy2016q3,fy2016q4,fy2017q1,fy2017q2) %>%
+    group_by(psnu,indicator) %>%
+    summarise(fy2015q3 = sum(fy2015q3,na.rm=TRUE),
+              fy2015q4 = sum(fy2015q4,na.rm=TRUE),
+              fy2016q1 = sum(fy2016q1,na.rm=TRUE),
+              fy2016q2 = sum(fy2016q2,na.rm=TRUE),
+              fy2016q3 = sum(fy2016q3,na.rm=TRUE),
+              fy2016q4 = sum(fy2016q4,na.rm=TRUE),
+              fy2017q1 = sum(fy2017q1,na.rm=TRUE),
+              fy2017q2 = sum(fy2017q2,na.rm=TRUE)
+    ) %>%
+    select(psnu,indicator,fy2015q3,fy2015q4,fy2016q1,fy2016q2,fy2016q3,fy2016q4,fy2017q1,fy2017q2)
+
+htc_by_snu
+
+write.csv(htc_by_snu, "htc_by_snu.csv")
+
+# OVC_SER by SNU
+
+ovc_serv_by_snu <- fy2017q2 %>%
+    filter(indicator %in% c("OVC_SERV")) %>%
+    filter(indicatortype == "DSD") %>% 
+    filter(numeratordenom == "N") %>%  
+    filter(disaggregate == "Total Numerator") %>%
+    select(psnu,indicator,fy17snuprioritization,fy2015q4,fy2016q4,fy2017q2) %>%
+    group_by(psnu,indicator,fy17snuprioritization) %>%
+    summarise(fy2015q4 = sum(fy2015q4,na.rm=TRUE),
+              fy2016q4 = sum(fy2016q4,na.rm=TRUE),
+              fy2017q2 = sum(fy2017q2,na.rm=TRUE)
+    ) %>%
+    select(psnu,indicator,fy17snuprioritization,fy2015q4,fy2016q4,fy2017q2)
+ovc_serv_by_snu
+
+write.csv(ovc_serv_by_snu,"ovc_serv_by_snu.csv")
