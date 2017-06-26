@@ -155,7 +155,7 @@ htc_by_snu <- fy2017q2 %>%
 
 htc_by_snu
 
-write.csv(htc_by_snu, "htc_by_snu.csv")
+#write.csv(htc_by_snu, "htc_by_snu.csv")
 
 # OVC_SER by SNU
 
@@ -173,4 +173,22 @@ ovc_serv_by_snu <- fy2017q2 %>%
     select(psnu,indicator,fy17snuprioritization,fy2015q4,fy2016q4,fy2017q2)
 ovc_serv_by_snu
 
-write.csv(ovc_serv_by_snu,"ovc_serv_by_snu.csv")
+#write.csv(ovc_serv_by_snu,"ovc_serv_by_snu.csv")
+
+# filter implemeting mechanim data
+
+by_im <- fy2017q2 %>%
+            filter(indicator %in% q2_ind) %>%
+            filter(implementingmechanismname != "Dedup") %>%
+            filter(indicatortype == "DSD") %>% 
+            filter(numeratordenom == "N" | numeratordenom == "D") %>%  
+            filter(disaggregate == "Total Numerator" | disaggregate == "Total Denominator") %>%
+            select(implementingmechanismname,indicator,disaggregate,fy2017q1,fy2017q2) %>%
+            group_by(implementingmechanismname,indicator,disaggregate) %>%
+            summarise(fy2017q1 = sum(fy2017q1, na.rm = T),
+                      fy2017q2 = sum(fy2017q2, na.rm = T)) %>%
+            mutate( fy2017sapr = ifelse( indicator %in% ind_sum,fy2017q1+fy2017q2,fy2017q2)) %>%
+            select(implementingmechanismname,indicator,disaggregate,fy2017q1,fy2017q2,fy2017sapr)
+
+by_im
+write.csv(by_im,"by_im.csv")
