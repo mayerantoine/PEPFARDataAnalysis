@@ -1,4 +1,5 @@
 library(tidyverse)
+setwd("C:/Users/wsn8/Documents/PEPFARDataAnalysis/fy2017q2_htc")
 #load  Site X IM Haiti data
 ### !!! This dataset doesn't include community data
 fy2017q1 <- read_tsv("data/ICPI_FactView_Site_IM_Haiti_20170324_v2_2.txt")
@@ -18,6 +19,8 @@ fy2017q1_htc <- fy2017q1 %>% filter(indicator == "HTS_TST" | indicator == "HTS_T
                                gather("quarter","NbTested",FY2015Q2:FY2017Q1)
 # Total number of sites 
 N_SITE <- fy2017q1_htc %>% summarise(NbSite = n_distinct(Facility))
+
+N_SITE
 
 # Nb sites and total test by quarter,indicator and disaggregation
 htc_by_quarter_disaggregate <- fy2017q1_htc %>% 

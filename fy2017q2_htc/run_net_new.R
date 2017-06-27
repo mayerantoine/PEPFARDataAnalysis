@@ -36,7 +36,7 @@ fy2017_net_new <- fy2017q2 %>%
                            fy2017targets = sum(fy2017_targets, na.rm = TRUE)) %>%
                  mutate(fy16_net_new = fy2016apr - fy2015apr,
                         fy17q2_net_new = fy2017q2 - fy2016apr ,
-                        fy17_net_new_target = fy2017targets -  fy2016apr)
+                        fy17_net_new_target = fy2017targets - fy2016apr)
 
 
 tx_new <-  fy2017q2 %>%
@@ -55,4 +55,86 @@ tx_new <-  fy2017q2 %>%
 fy2017_net_new <- left_join(fy2017_net_new,tx_new, by="facility")
 
 fy2017_net_new <- mutate(fy2017_net_new,
-                       fy17q2_attrition = fy2016apr + fy2017_tx_new - fy2017q2)
+                       fy17q2_attrition = fy2017q2 -(fy2016apr + fy2017_tx_new))
+
+# net new by SNU
+fy2017_net_new_SNU  <- fy2017q2 %>%
+    filter(indicator %in% c("TX_CURR")) %>%
+    filter(disaggregate == "Total Numerator") %>%
+    filter(indicatortype == "DSD") %>% 
+    filter(typefacility == "Y") %>%
+    filter(numeratordenom == "N") %>%
+    select(psnu,fy17snuprioritization,fy2015apr,fy2016apr,fy2017q2,fy2017_targets) %>%
+    group_by(psnu,fy17snuprioritization) %>%
+    summarise(fy2015apr = sum(fy2015apr, na.rm= TRUE),
+              fy2016apr = sum(fy2016apr, na.rm = TRUE),
+              fy2017q2 = sum(fy2017q2, na.rm = TRUE),
+              fy2017targets = sum(fy2017_targets, na.rm = TRUE)) %>%
+    mutate(fy16_net_new = fy2016apr - fy2015apr,
+           fy17q2_net_new = fy2017q2 - fy2016apr ,
+           fy17_net_new_target = fy2017targets -  fy2016apr)
+
+fy2017_net_new_SNU$gap_to_target <- ifelse(fy2017_net_new_SNU$fy17_net_new_target>0 & fy2017_net_new_SNU$fy17_net_new_target > fy2017_net_new_SNU$fy17q2_net_new,
+                                           fy2017_net_new_SNU$fy17_net_new_target - fy2017_net_new_SNU$fy17q2_net_new,0)
+
+#gap <- ifelse(fy2017_net_new_SNU$fy17_net_new_target>0 & fy2017_net_new_SNU$fy17_net_new_target > fy2017_net_new_SNU$fy17q2_net_new,
+ #                    fy2017_net_new_SNU$fy17_net_new_target - fy2017_net_new_SNU$fy17q2_net_new,0)
+
+#fy2017_net_new_SNU <- fy2017_net_new_SNU %>% mutate(gap_to_target = gap )
+
+write.csv(fy2017_net_new_SNU,"fy2017_net_new_SNU.csv")
+
+fy2017_IM_Q2  <- fy2017q2 %>%
+    filter(indicator %in% c("TX_CURR")) %>%
+    filter(disaggregate == "Total Numerator") %>%
+    filter(indicatortype == "DSD") %>% 
+    filter(typefacility == "Y") %>%
+    filter(numeratordenom == "N") %>%
+    select(implementingmechanismname,fy2017q2) %>%
+    group_by(implementingmechanismname) %>%
+    summarise(fy2017q2 = sum(fy2017q2, na.rm = TRUE))
+
+
+# net new by Agency
+
+fy2017_net_new_Agency <- fy2017q2 %>%
+    filter(indicator %in% c("TX_CURR")) %>%
+    filter(disaggregate == "Total Numerator") %>%
+    filter(indicatortype == "DSD") %>% 
+    filter(typefacility == "Y") %>%
+    filter(numeratordenom == "N") %>%
+    select(fundingagency,fy2015apr,fy2016apr,fy2017q2,fy2017_targets) %>%
+    group_by(fundingagency) %>%
+    summarise(fy2015apr = sum(fy2015apr, na.rm= TRUE),
+              fy2016apr = sum(fy2016apr, na.rm = TRUE),
+              fy2017q2 = sum(fy2017q2, na.rm = TRUE),
+              fy2017targets = sum(fy2017_targets, na.rm = TRUE)) %>%
+    mutate(fy16_net_new = fy2016apr - fy2015apr,
+           fy17q2_net_new = fy2017q2 - fy2016apr ,
+           fy17_net_new_target = fy2017targets -  fy2016apr)
+
+fy2017_net_new_Agency$gap_to_target <- ifelse(fy2017_net_new_Agency$fy17_net_new_target>0 & fy2017_net_new_Agency$fy17_net_new_target > fy2017_net_new_Agency$fy17q2_net_new,
+                                              fy2017_net_new_Agency$fy17_net_new_target - fy2017_net_new_Agency$fy17q2_net_new,0)         
+
+write.csv(fy2017_net_new_Agency,"fy2017_net_new_Agency.csv")
+
+# net new by OU
+
+fy2017_net_new_OU <- fy2017q2 %>%
+    filter(indicator %in% c("TX_CURR")) %>%
+    filter(disaggregate == "Total Numerator") %>%
+    filter(indicatortype == "DSD") %>% 
+    filter(typefacility == "Y") %>%
+    filter(numeratordenom == "N") %>%
+    select(fy2015apr,fy2016apr,fy2017q2,fy2017_targets) %>%
+    summarise(fy2015apr = sum(fy2015apr, na.rm= TRUE),
+              fy2016apr = sum(fy2016apr, na.rm = TRUE),
+              fy2017q2 = sum(fy2017q2, na.rm = TRUE),
+              fy2017targets = sum(fy2017_targets, na.rm = TRUE)) %>%
+    mutate(fy16_net_new = fy2016apr - fy2015apr,
+           fy17q2_net_new = fy2017q2 - fy2016apr ,
+           fy17_net_new_target = fy2017targets -  fy2016apr)
+
+fy2017_net_new_OU$gap_to_target <- ifelse(fy2017_net_new_OU$fy17_net_new_target>0 & fy2017_net_new_OU$fy17_net_new_target > fy2017_net_new_OU$fy17q2_net_new,
+                                          fy2017_net_new_OU$fy17_net_new_target - fy2017_net_new_OU$fy17q2_net_new,0)         
+write.csv(fy2017_net_new_OU,"fy2017_net_new_OU.csv")
