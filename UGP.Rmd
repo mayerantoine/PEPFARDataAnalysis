@@ -1,11 +1,23 @@
-setwd("C:/Users/wsn8/Documents/PEPFARDataAnalysis")
+---
+title: "Partner Performance Report"
+output: html_document
+---
 
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE,  warning = FALSE)
+```
+```{r load_packages, include=FALSE,message=F, warning=F}
 library(tidyverse)
-library(knitr)
 library(formattable)
+library(knitr)
+library(xtable)
+library(pander)
+```
+## FY2017 MSPP/ UGP
 
-rm(list=ls())
-## @knitr load_target_and_mapping
+
+```{r load_target_and_mapping,message=F, warning=F}
+
 rawdata <- read_tsv("BasicGraphics/data/ICPI_FactView_Site_IM_Haiti_20170515_v1_1.txt")
 names(rawdata) <- tolower(names(rawdata))
 old_mechanism <- c("FOSREF","PIH","CDS","TBD2","Catholic Medical Mission Board","University of Maryland","Health Service Delivery",
@@ -24,9 +36,10 @@ fy2017_target <- rawdata %>%
                
 # load site_mapping
 mapping <- read_csv("site_mapping.csv")
+```
 
-## @knitr load_prepare_testing_data
-#  TESTING DATA
+
+```{r load_prepare_testing_data,message=F, warning=F}
 patient_cdv <-  read_csv("mesi_report_cdv.csv", skip =1)
 names(patient_cdv)  <-  make.names(names(patient_cdv))
 patient_cdv <- patient_cdv %>% select(RESEAU, INSTITUTION,TOTAL)
@@ -40,14 +53,15 @@ hts_target[which(hts_target$facility == "Centre Jeunes Plaine du Cul-de-Sac"),
        c("implementingmechanismname")] <-  "FOSREF 1925"
 hts_target[which(hts_target$facility == "Centre Lakay de Ouanaminthe"),
            c("implementingmechanismname")] <-  "Linkages"
+
 hts_target <- mutate(hts_target,performance = ifelse(FY17TARGET == 0, 0, TOTAL/FY17TARGET))
 hts_target$performance <- percent(hts_target$performance, digits= 2L )
 
 hts_target <- hts_target %>% select(facility,mechanism = implementingmechanismname,
                                     indicator,FY17Results = TOTAL, FY17TARGET,performance)
+```
 
-## load_prepare_tx_new_data
-# TX_NEW 
+```{r load_prepare_tx_new_data,message=F, warning=F}
 patient_enrolles <- read_csv("mesi_report_nouveau_enrolles.csv", skip = 1)
 names(patient_enrolles) <- make.names(names(patient_enrolles))
 names(patient_enrolles)[11] <- "TOTAL"
@@ -66,9 +80,9 @@ tx_new_target$performance <- percent(tx_new_target$performance, digits= 2L )
 
 tx_new_target <- tx_new_target %>% select(facility,mechanism = implementingmechanismname,
                                     indicator,FY17Results = TOTAL, FY17TARGET,performance)
+```
 
-## load_prepare_tx_curr_data
-# TX_CURR
+```{r load_prepare_tx_curr_data,message=F, warning=F}
 patient_actifs <- read_csv("mesi_report_actifs.csv", skip = 1)
 names(patient_actifs) <- make.names(names(patient_actifs))
 patient_actifs <-  patient_actifs %>% select(RESEAU,INSTITUTION,TOTAL)
@@ -79,14 +93,15 @@ tx_curr_target <- left_join(tx_curr_target,patient_actifs,by = c("facility"="Fac
 
 tx_curr_target[which(tx_curr_target$facility == "Centre Jeunes Plaine du Cul-de-Sac"),
               c("implementingmechanismname")] <-  "FOSREF 1925"
-
 tx_curr_target <- mutate(tx_curr_target,performance = ifelse(FY17TARGET == 0, 0, TOTAL/FY17TARGET))
 tx_curr_target$performance <- percent(tx_curr_target$performance, digits= 2L )
 
 tx_curr_target <- tx_curr_target %>% select(facility,mechanism = implementingmechanismname,
                                           indicator,FY17Results = TOTAL, FY17TARGET,performance)
-## load_prepare_hts_tst_pos_data
-# HTS_TST_POS
+```
+
+
+```{r load_prepare_hts_tst_pos_data,message=F, warning=F}
 patient_positifs <- read_csv("mesi_report_positifs.csv",skip =1)
 names(patient_positifs) <-  make.names(names(patient_positifs))
 patient_positifs <-  patient_positifs %>% select(RESEAU,INSTITUTION, TOTAL)
@@ -101,28 +116,16 @@ hts_pos_target$performance <- percent(hts_pos_target$performance, digits= 2L )
 
 hts_pos_target <- hts_pos_target %>% select(facility,mechanism = implementingmechanismname,
                                             indicator,FY17Results = TOTAL, FY17TARGET,performance)
+```
 
-## load_prepare_hts_yield_data
-# HTS_YIELD
-positifs <- read_csv("mesi_report_positifs.csv",skip =1)
-names(positifs) <-  make.names(names(positifs))
-positifs <- filter(positifs,!is.na(INSTITUTION))
-positifs <- filter(positifs,!is.na(RESEAU))
-positifs <-  positifs %>% select(RESEAU,INSTITUTION, HTS_TST_POS = TOTAL)
 
-cdv <-  read_csv("mesi_report_cdv.csv", skip =1)
-names(cdv)  <-  make.names(names(cdv))
-cdv <- filter(cdv,!is.na(INSTITUTION))
-cdv <- filter(cdv,!is.na(RESEAU))
-cdv <- cdv %>% select(RESEAU, INSTITUTION,HTS_TST = TOTAL)
 
-htc_yield <- inner_join(cdv,positifs, by = "INSTITUTION")
-htc_yield <-  mutate(htc_yield,HTC_YIELD =ifelse(
-    HTS_TST == 0, 0, HTS_TST_POS / HTS_TST
-))
+```{r load_prepare_hts_yield_data,message=F, warning=F}
 
-## load_prepare_net_new_data
-# TX_NET_NEW
+```
+
+
+```{r load_prepare_net_new_data,message=F, warning=F}
 patient_actifs <- read_csv("mesi_report_actifs.csv", skip = 1)
 names(patient_actifs) <- make.names(names(patient_actifs))
 patient_actifs <-  patient_actifs %>% select(RESEAU,INSTITUTION,fy2017May =TOTAL)
@@ -144,14 +147,43 @@ fy2017_net_new <- rawdata %>%
 
 fy2017_net_new <- left_join(fy2017_net_new,patient_actifs,by = c("facility" = "Facility.DATIM"))
 fy2017_net_new <- mutate(fy2017_net_new, fy2017May_net_new = fy2017May-fy2016apr)
+```
+
+
+```{r}
 
 ##merge all site files
 fy2017_results <- rbind(hts_target,hts_pos_target,tx_new_target,tx_curr_target)
 fy2017_results$performance <- percent(fy2017_results$performance, digits= 2L )
 
+```
+
+```{r siteperformancetable,message=F, warning=F}
+cdc<- c("CDS 1528","CMMB 1970","FOSREF 1925","GHESKIO 1924",
+                  "GHESKIO 1969","MSPP/UGP (National AIDS Strategic Plan)","PIH 1926")
+   ind <- c("HTS_TST","HTS_TST_POS","TX_NEW","TX_CURR")
+print_partner <- function(data,p,i) {
+     tab <- filter(fy2017_results, mechanism == p & indicator == i) %>% 
+         select (facility,FY17Results,FY17TARGET,performance)
+     pandoc.header(" ", level = 3)
+     pandoc.header(paste(i, "performance by site"), level = 4)
+     print(kable(tab,format = "html"))
+}
+```
 
 
-write.csv(fy2017_results,"fy2017_results.csv")
-write.csv(htc_yield,"htc_yield.csv")
-write.csv(fy2017_net_new,"fy2017_net_new.csv")
+## `r cdc[6]`
 
+###
+```{r message=F, warning=F, results= "asis"}
+
+print_partner(fy2017_results,cdc[6],ind[1])
+
+```
+
+
+```{r message=F, warning=F, results= "asis"}
+
+print_partner(fy2017_results,cdc[6],ind[1])
+
+```
