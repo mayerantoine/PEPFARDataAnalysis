@@ -48,7 +48,7 @@ hts_target <- hts_target %>% select(facility,mechanism = implementingmechanismna
 
 ## load_prepare_tx_new_data
 # TX_NEW 
-patient_enrolles <- read_csv("mesi_report_nouveau_enrolles.csv", skip = 1)
+patient_enrolles1 <- read_csv("mesi_report_nouveau_enrolles.csv", skip = 1)
 names(patient_enrolles) <- make.names(names(patient_enrolles))
 names(patient_enrolles)[11] <- "TOTAL"
 patient_enrolles <- patient_enrolles %>% select(RESEAU, INSTITUTION,TOTAL)

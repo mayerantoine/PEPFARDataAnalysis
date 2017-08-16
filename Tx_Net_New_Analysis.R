@@ -45,7 +45,7 @@ rm(list=ls())
 
 ## load_prepare_net_new_data
 # TX_CURR
-    patient_actifs <- read_csv("mesi_report_actifs_juin.csv", skip = 1)
+    patient_actifs <- read_csv("mesi_report_actifs_july.csv", skip = 1)
     names(patient_actifs) <- make.names(names(patient_actifs))
     patient_actifs <-  patient_actifs %>% select(RESEAU,INSTITUTION,fy2017Cum =TOTAL)
     patient_actifs <- filter(patient_actifs,!is.na(INSTITUTION))
@@ -53,7 +53,7 @@ rm(list=ls())
 
 #load_prepare_tx_new_data
 # TX_NEW 
-    patient_enrolles <- read_csv("mesi_report_nouveau_enrolles_juin.csv", skip = 1)
+    patient_enrolles <- read_csv("mesi_report_nouveau_enrolles_july.csv", skip = 1)
     names(patient_enrolles) <- make.names(names(patient_enrolles))
     names(patient_enrolles)[9] <- "TOTAL"
     patient_enrolles <- patient_enrolles %>% select(RESEAU, INSTITUTION,TOTAL)
@@ -104,7 +104,7 @@ rm(list=ls())
 
 
 #export data set in as csv file
-    write.csv(fy2017_net_new,"fy2017_net_new2.csv")
+    write.csv(fy2017_net_new,"fy2017_net_new_july.csv")
     
     
 ### Prison civile des femmes de cabaret not included
